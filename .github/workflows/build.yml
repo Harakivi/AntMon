@@ -1,0 +1,31 @@
+name: CMake+Arm-none-eabi
+
+on:
+  push:
+    branches: [ "main", "feature/**"]
+  pull_request:
+    branches: [ "main", "feature/**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Setup Ninja
+      run: sudo apt-get install -y ninja-build
+    - name: Setup gcc-arm-none-eabi
+      run: sudo apt-get install -y gcc-arm-none-eabi
+    - name: Configure CMake
+      run: cmake ${{github.workspace}} --preset=Release -DGITHUB_RUN_NUMBER=${{github.run_number}}
+    - name: Build and install
+      run: |
+          cmake --build ${{github.workspace}}/build 
+          cmake --install ${{github.workspace}}/build 
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: install
+        path: build/install
+

@@ -13,14 +13,14 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 set(MCU_FLAGS "-mcpu=cortex-m3 -mthumb -Wall -fdata-sections -ffunction-sections")
 set(CMAKE_C_FLAGS "${MCU_FLAGS}"  CACHE INTERNAL "c compiler flags")
-set(CMAKE_CXX_FLAGS "${MCU_FLAGS}" CACHE INTERNAL "cxx compiler flags")
+set(CMAKE_CXX_FLAGS "${MCU_FLAGS} -std=c++17" CACHE INTERNAL "cxx compiler flags")
 set(CMAKE_ASM_FLAGS "${MCU_FLAGS}" CACHE INTERNAL "asm compiler flags")
 
-set(CMAKE_C_FLAGS_DEBUG "${MCU_FLAGS} -g -Og -DDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "${MCU_FLAGS} -g -Og -DDEBUG")
-set(CMAKE_ASM_FLAGS_DEBUG "${MCU_FLAGS} -g -Og -DDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS} -g -Og -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g -Og -DDEBUG")
+set(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS} -g -Og -DDEBUG")
 
-set(CMAKE_C_FLAGS_RELEASE "${MCU_FLAGS}")
-set(CMAKE_CXX_FLAGS_RELEASE "${MCU_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,--print-memory-usage --specs=nosys.specs -Wl,--gc-sections")

@@ -1,0 +1,29 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"cwd": "${workspaceRoot}",
+				"name": "ST-Link",
+				"request": "launch",
+				"type": "cortex-debug",
+				"runToEntryPoint": "main",
+				"executable": "${command:cmake.launchTargetPath}",
+				"gdbPath" : "arm-none-eabi-gdb",
+				"showDevDebugOutput": "none",
+				"servertype": "openocd",
+				"configFiles": [
+					"interface/stlink-dap.cfg",
+					"target/stm32f1x.cfg"
+				], 
+				"device": "STM32F103C8T6",
+				"svdFile": "CMSIS/STM32F103.svd"
+			}
+		]
+	}
+}

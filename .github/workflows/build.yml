@@ -1,11 +1,5 @@
 name: CMake+Arm-none-eabi
 
-on:
-  push:
-    branches: [ "main", "feature/**"]
-  pull_request:
-    branches: [ "main", "feature/**" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -1,5 +1,7 @@
 name: CMake+Arm-none-eabi
 
+on: push
+
 jobs:
   build:
     runs-on: ubuntu-latest

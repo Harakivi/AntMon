@@ -15,6 +15,7 @@
    ││└── RXD 
    │└─── GND
    └──── VCC (3.3V)
+```
 
 ## References
 

@@ -70,4 +70,4 @@ target_link_options(${TARGET} PUBLIC -T ${DEVICE_LINKER_SCRIPT} -Wl,-Map=${PROJE
 
 add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_OBJCOPY} ARGS -O binary ${TARGET} ${PROJECT_NAME}.bin)
 
-install(FILES build/${PROJECT_NAME}.bin DESTINATION ./)
+install(FILES build/${PROJECT_NAME}.bin DESTINATION ./ RENAME ${PROJECT_NAME}_${PROJECT_VERSION}.bin)

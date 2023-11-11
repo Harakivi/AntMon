@@ -21,9 +21,13 @@
 					"interface/stlink-dap.cfg",
 					"target/stm32f1x.cfg"
 				], 
-				"device": "STM32F103C8T6",
-				"svdFile": "CMSIS/STM32F103.svd"
+				"device": "STM32F100C4T6",
+				"svdFile": "SVD/STM32F100xx.svd"
 			}
 		]
+	},
+	"settings": {
+		"files.associations": {
+		}
 	}
 }

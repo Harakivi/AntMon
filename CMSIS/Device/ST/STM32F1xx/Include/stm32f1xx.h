@@ -56,7 +56,7 @@
    application 
   */
 
-#if !defined (STM32F100xB) && !defined (STM32F100xE) && !defined (STM32F101x6) && \
+#if !defined (STM32F100x4) && !defined (STM32F100xB) && !defined (STM32F100xE) && !defined (STM32F101x6) && \
     !defined (STM32F101xB) && !defined (STM32F101xE) && !defined (STM32F101xG) && !defined (STM32F102x6) && !defined (STM32F102xB) && !defined (STM32F103x6) && \
     !defined (STM32F103xB) && !defined (STM32F103xE) && !defined (STM32F103xG) && !defined (STM32F105xC) && !defined (STM32F107xC)
   /* #define STM32F100xB  */   /*!< STM32F100C4, STM32F100R4, STM32F100C6, STM32F100R6, STM32F100C8, STM32F100R8, STM32F100V8, STM32F100CB, STM32F100RB and STM32F100VB */

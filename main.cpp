@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "uart.hpp"
 #include "AntBms.hpp"
+#include "dac.hpp"
 
 UART_HandleTypeDef huart1;
 
@@ -26,7 +27,9 @@ void SystemClock_Config(void)
 }
 
 typedef InternalPeriph::Uart<1> Cli;
+typedef InternalPeriph::Dac Dac;
 Cli *cli = Cli::Get();
+Dac *dac = Dac::Get();
 typedef InternalPeriph::Uart<3> bmsUart;
 
 int main()
@@ -36,8 +39,11 @@ int main()
     cli->Open(115200);
     cli->print("start\r\n");
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
-    ant.UpdateLiveData();
+    bool valid = false;
+    Drivers::AntLiveData livedata = ant.ReadLiveData(valid);
+    dac->ChannelInit(1);
+    
     while (1)
-    {
+    {        
     }
 }

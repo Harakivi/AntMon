@@ -229,7 +229,7 @@ void SystemCoreClockUpdate (void)
   uint32_t prediv1source = 0U, prediv1factor = 0U, prediv2factor = 0U, pll2mull = 0U;
 #endif /* STM32F105xC */
 
-#if defined(STM32F100xB) || defined(STM32F100xE)
+#if defined(STM32F100xB) || defined(STM32F100x4) || defined(STM32F100xE)
   uint32_t prediv1factor = 0U;
 #endif /* STM32F100xB or STM32F100xE */
     
@@ -260,7 +260,7 @@ void SystemCoreClockUpdate (void)
       }
       else
       {
- #if defined(STM32F100xB) || defined(STM32F100xE)
+ #if defined(STM32F100xB) || defined(STM32F100x4) || defined(STM32F100xE)
        prediv1factor = (RCC->CFGR2 & RCC_CFGR2_PREDIV1) + 1U;
        /* HSE oscillator clock selected as PREDIV1 clock entry */
        SystemCoreClock = (HSE_VALUE / prediv1factor) * pllmull; 

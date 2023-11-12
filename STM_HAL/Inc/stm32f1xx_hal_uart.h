@@ -77,7 +77,7 @@ typedef struct
 /**
   * @brief HAL UART State structures definition
   * @note  HAL UART State value is a combination of 2 different substates: gState and RxState.
-  *        - gState contains UART state information related to global Handle management
+  *        - gState contains UART state infUART_Modeormation related to global Handle management
   *          and also information related to Tx operations.
   *          gState value coding follow below described bitmap :
   *          b7-b6  Error information

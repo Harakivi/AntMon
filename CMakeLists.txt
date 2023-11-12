@@ -17,7 +17,7 @@ message("Build version = ${PROJECT_VERSION}\r\nBuild date = ${DATE}")
 
 file(WRITE ${SOURCE_DIR}Version.h ${VERSION_INFO} "\r\n" ${DATE_INFO})
 
-set(ST_DEVICE STM32F103x6)
+set(ST_DEVICE STM32F100x8)
 
 set(HSE_VALUE 8000000)
 set(LSE_VALUE 32768)
@@ -26,47 +26,90 @@ set(LSE_VALUE 32768)
 #                          CMSIS                            #
 #############################################################
 
+if(ST_DEVICE STREQUAL STM32F100x4 OR ST_DEVICE STREQUAL STM32F100x8)
+set(ST_DEVICE_CMSIS STM32F100xB)
+else()
+set(ST_DEVICE_CMSIS ST_DEVICE)
+endif()
 
-add_subdirectory(CMSIS)
+string(TOLOWER ${ST_DEVICE} ST_DEVICE_LOWERCASE)
+string(TOUPPER ${ST_DEVICE} ST_DEVICE_UPPERCASE)
 
-get_target_property(CMSIS_LIBRARY_INCLUDE_DIR CMSIS_LIBRARY INCLUDE_DIRECTORIES)
+set(DEVICE_LINKER_SCRIPT ${PROJECT_SOURCE_DIR}/CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc/linker/${ST_DEVICE_UPPERCASE}_FLASH.ld CACHE STRING "")
+
+file(GLOB CMSIS_SRC
+    CMSIS/Device/ST/STM32F1xx/Source/Templates/*.c
+    CMSIS/Device/ST/STM32F1xx/Source/Templates/gcc/startup_${ST_DEVICE_LOWERCASE}.s
+)
+
+add_library(CMSIS_LIBRARY STATIC ${CMSIS_SRC})
+
+target_include_directories(CMSIS_LIBRARY PUBLIC CMSIS/Include/ CMSIS/Device/ST/STM32F1xx/Include/)
 
 target_compile_definitions(CMSIS_LIBRARY PUBLIC 
+                            -D${ST_DEVICE_CMSIS}
                             -DHSE_VALUE=${HSE_VALUE}
                             -DLSE_VALUE=${LSE_VALUE})
 
-target_link_options(CMSIS_LIBRARY PUBLIC 
-                    -Wl,--defsym,_Stack_Size=0x400
-                    -Wl,--defsym,_Heap_Size=0x200)
+target_link_options(CMSIS_LIBRARY PRIVATE -nostdlib)
+
+get_target_property(CMSIS_LIBRARY_INCLUDE_DIR CMSIS_LIBRARY INCLUDE_DIRECTORIES)
 
 
 #############################################################
 #                          STM_HAL                          #
 #############################################################
 
-add_subdirectory(STM_HAL)
+if(ST_DEVICE STREQUAL STM32F100x4 OR ST_DEVICE STREQUAL STM32F100x8)
+set(ST_DEVICE_HAL STM32F100xB)
+else()
+set(ST_DEVICE_HAL ST_DEVICE)
+endif()
 
-get_target_property(STM_HAL_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY INCLUDE_DIRECTORIES)
+file(GLOB STM_HAL_SRC
+    STM_HAL/Src/*.c
+)
 
-target_include_directories(STM_HAL_LIBRARY PUBLIC ${CMSIS_LIBRARY_INCLUDE_DIR})
+add_library(STM_HAL_LIBRARY STATIC ${STM_HAL_SRC})
+
+target_include_directories(STM_HAL_LIBRARY PUBLIC 
+                            STM_HAL/Inc/ 
+                            include/ 
+                            ${CMSIS_LIBRARY_INCLUDE_DIR})
 
 target_compile_definitions(STM_HAL_LIBRARY PUBLIC 
+                            -D${ST_DEVICE_HAL}
                             -DHSE_VALUE=${HSE_VALUE}
                             -DLSE_VALUE=${LSE_VALUE})
+
+target_link_libraries(STM_HAL_LIBRARY CMSIS_LIBRARY)
+
+target_link_options(STM_HAL_LIBRARY PRIVATE -nostdlib)
+
+get_target_property(STM_HAL_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY INCLUDE_DIRECTORIES)
 
 #############################################################
 #                        AntMonProj                         #
 #############################################################
 
+file(GLOB SOURCES
+    source/*.c
+    source/*.cpp
+)
+
 set(TARGET ${PROJECT_NAME}.elf)
 
-add_executable(${TARGET} main.cpp)
+add_executable(${TARGET} main.cpp ${SOURCES})
 
-target_include_directories(${TARGET} PUBLIC CMSIS_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY_INCLUDE_DIR)
+target_include_directories(${TARGET} PUBLIC CMSIS_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY_INCLUDE_DIR include/)
 
 target_link_libraries(${TARGET} CMSIS_LIBRARY STM_HAL_LIBRARY)
 
-target_link_options(${TARGET} PUBLIC -T ${DEVICE_LINKER_SCRIPT} -Wl,-Map=${PROJECT_NAME}.map)
+target_link_options(${TARGET} PUBLIC 
+                        -T ${DEVICE_LINKER_SCRIPT} 
+                        -Wl,-Map=${PROJECT_NAME}.map
+                        -Wl,--defsym,_Stack_Size=0x400
+                        -Wl,--defsym,_Heap_Size=0x200)
 
 add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_OBJCOPY} ARGS -O binary ${TARGET} ${PROJECT_NAME}.bin)
 

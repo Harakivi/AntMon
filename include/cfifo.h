@@ -9,9 +9,9 @@ extern "C" {
 typedef struct {
 	uint32_t capacity;
 	uint32_t cursor;
-	uint32_t length;
+	volatile uint32_t length;
 	void *ptr;
-	bool lock;
+	volatile bool lock;
 }cfifo;
 
 void cfifo_init(cfifo *cfifo, void *buffer, uint32_t capacity);

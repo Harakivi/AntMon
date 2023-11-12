@@ -4,7 +4,7 @@
 
 namespace Drivers
 {
-    
+
 #pragma pack(push, 1)
     typedef struct
     {
@@ -51,6 +51,7 @@ namespace Drivers
     class AntBms
     {
     private:
+        AntBms(){}
         InternalPeriph::iUart *_uart;
         uint16_t _calcCheckSum(const AntLiveData& liveData);
     public:

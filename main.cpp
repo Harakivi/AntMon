@@ -38,17 +38,30 @@ int main()
     SystemClock_Config();
     cli->Open(115200);
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
-    bool valid = false;
+    bool valid = true;
+    Drivers::AntLiveData livedata = {0};
+    uint16_t dacValCh1 = 0;
     dac->ChannelInit(1);
     while (1)
     {
-        Drivers::AntLiveData livedata = ant.ReadLiveData(valid);
-        cli->print("\033c");
-        cli->print("\r\n========================\r\n");
-        cli->print("AntBms data valid = %d\r\n", valid);
-        cli->print("AntBms percentage = %d\r\n", livedata.Struct.SOC);
-        cli->print("Total Voltage = %d\r\n", (livedata.Struct.TotalVoltage[0] << 8) + livedata.Struct.TotalVoltage[1]);
-        cli->print("========================\r\n");
-        HAL_Delay(2000);
+        livedata = ant.ReadLiveData(valid);
+        if (valid)
+        {
+            dacValCh1 = livedata.Struct.SOC * 12 + 2895;
+            dac->SetValue(dacValCh1, 1);
+            cli->print("\033c");
+            if (livedata.Struct.SOC >= 75)
+                cli->print("\033[92m");
+            else if (livedata.Struct.SOC < 75 && livedata.Struct.SOC >= 35)
+                cli->print("\033[93m");
+            else if (livedata.Struct.SOC < 35)
+                cli->print("\033[91m");
+            cli->print("========================\r\n");
+            cli->print("AntBms SOC = %d\r\n", livedata.Struct.SOC);
+            cli->print("Total Voltage = %d\r\n", (livedata.Struct.TotalVoltage[0] << 8) + livedata.Struct.TotalVoltage[1]);
+            cli->print("DAC ch1 Value = %d\r\n", dacValCh1);
+            cli->print("========================\r\n");
+            HAL_Delay(2000);
+        }
     }
 }

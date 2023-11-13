@@ -1,19 +1,24 @@
 #pragma once
 #include "uart.h"
-#include <stdarg.h>
 #include <stdint.h>
-#include "printf.h"
+
 
 namespace InternalPeriph
 {
+    class UartHandler
+    {
+    public:
+        virtual void onByteReceived(uint8_t data) = 0;
+    };
+
     class iUart
     {
     public:
         virtual bool Open(uint32_t BaudRate, void (*onByteReceived)(uint8_t) = nullptr) = 0;
 
-        virtual bool Write(uint8_t *buffer, uint32_t count) = 0;
+        virtual bool Open(uint32_t BaudRate, UartHandler *handler) = 0;
 
-        virtual int print(const char *format, ...) = 0;
+        virtual bool Write(uint8_t *buffer, uint32_t count) = 0;
 
         virtual uint32_t GetReceived(uint8_t *buffer, uint32_t size) = 0;
     };
@@ -23,7 +28,10 @@ namespace InternalPeriph
     {
     private:
         bool _opened;
-        Uart() : _opened(false) {}
+        UartHandler *_handler;
+        Uart() : _opened(false), _handler(nullptr) {}
+
+        static void _onByteReceived(uint8_t data);
 
     public:
         static Uart *Get()
@@ -54,6 +62,11 @@ namespace InternalPeriph
             return res;
         }
 
+        bool Open(uint32_t BaudRate, UartHandler *handler)
+        {
+            _handler = handler;
+            return Open(BaudRate, _onByteReceived);
+        }
         bool Write(uint8_t *buffer, uint32_t count)
         {
             if (_opened)
@@ -62,21 +75,6 @@ namespace InternalPeriph
                 return true;
             }
             return false;
-        }
-
-        int print(const char *format, ...)
-        {
-            uint32_t writted = 0;
-            if (_opened)
-            {
-                va_list va;
-                va_start(va, format);
-                char buffer[TX_BUFF_SIZE];
-                writted = vsnprintf(buffer, TX_BUFF_SIZE, format, va);
-                va_end(va);
-                UartWrite(uart, (uint8_t *)buffer, writted);
-            }
-            return writted;
         }
 
         uint32_t GetReceived(uint8_t *buffer, uint32_t size)
@@ -88,4 +86,11 @@ namespace InternalPeriph
             return 0;
         }
     };
+}
+
+template <int uart>
+void InternalPeriph::Uart<uart>::_onByteReceived(uint8_t data)
+{
+    if (Uart<uart>::Get()->_handler != nullptr)
+        Uart<uart>::Get()->_handler->onByteReceived(data);
 }

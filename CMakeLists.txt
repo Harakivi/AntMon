@@ -95,7 +95,7 @@ get_target_property(STM_HAL_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY INCLUDE_DIRECTOR
 file(GLOB SOURCES
     source/*.c
     source/*.cpp
-    small-printf/printf.c
+    small-printf/*.c
 )
 
 set(TARGET ${PROJECT_NAME}.elf)

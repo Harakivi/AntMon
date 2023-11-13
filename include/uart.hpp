@@ -1,6 +1,8 @@
 #pragma once
 #include "uart.h"
+#include <stdarg.h>
 #include <stdint.h>
+#include "printf.h"
 
 namespace InternalPeriph
 {
@@ -11,7 +13,7 @@ namespace InternalPeriph
 
         virtual bool Write(uint8_t *buffer, uint32_t count) = 0;
 
-        virtual void print(const char *ch) = 0;
+        virtual int print(const char *format, ...) = 0;
 
         virtual uint32_t GetReceived(uint8_t *buffer, uint32_t size) = 0;
     };
@@ -62,16 +64,19 @@ namespace InternalPeriph
             return false;
         }
 
-        void print(const char *ch)
+        int print(const char *format, ...)
         {
             uint32_t writted = 0;
             if (_opened)
             {
-                while (*(ch + writted))
-                {
-                    UartWrite(uart, (uint8_t *)ch + writted++, 1);
-                }
+                va_list va;
+                va_start(va, format);
+                char buffer[TX_BUFF_SIZE];
+                writted = vsnprintf(buffer, TX_BUFF_SIZE, format, va);
+                va_end(va);
+                UartWrite(uart, (uint8_t *)buffer, writted);
             }
+            return writted;
         }
 
         uint32_t GetReceived(uint8_t *buffer, uint32_t size)

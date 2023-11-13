@@ -95,13 +95,14 @@ get_target_property(STM_HAL_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY INCLUDE_DIRECTOR
 file(GLOB SOURCES
     source/*.c
     source/*.cpp
+    small-printf/printf.c
 )
 
 set(TARGET ${PROJECT_NAME}.elf)
 
 add_executable(${TARGET} main.cpp ${SOURCES})
 
-target_include_directories(${TARGET} PUBLIC CMSIS_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY_INCLUDE_DIR include/)
+target_include_directories(${TARGET} PUBLIC CMSIS_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY_INCLUDE_DIR include/ small-printf/)
 
 target_link_libraries(${TARGET} CMSIS_LIBRARY STM_HAL_LIBRARY)
 

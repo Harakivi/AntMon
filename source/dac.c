@@ -45,15 +45,37 @@ bool DacChannelInit(uint8_t channel)
         break;
     }
     return HAL_DAC_ConfigChannel(halHandle, &sConfig, dac_channel) == HAL_OK && HAL_DAC_Start(halHandle, dac_channel) == HAL_OK;
-
 }
 
 void DacSetValue(uint8_t channel, uint16_t value)
 {
-    HAL_DAC_SetValue(halHandle, channel, DAC_ALIGN_12B_R, value);
+    switch (channel)
+    {
+    case 1:
+        HAL_DAC_SetValue(halHandle, DAC1_CHANNEL_1, DAC_ALIGN_12B_R, value);
+        break;
+    case 2:
+        HAL_DAC_SetValue(halHandle, DAC1_CHANNEL_2, DAC_ALIGN_12B_R, value);
+        break;
+
+    default:
+        break;
+    }
 }
 
 uint16_t DacGetValue(uint8_t channel)
 {
-    return HAL_DAC_GetValue(halHandle, channel);
+    switch (channel)
+    {
+    case 1:
+        return HAL_DAC_GetValue(halHandle, DAC1_CHANNEL_1);
+        break;
+    case 2:
+        return HAL_DAC_GetValue(halHandle, DAC1_CHANNEL_2);
+        break;
+
+    default:
+        break;
+    }
+    return 0;
 }

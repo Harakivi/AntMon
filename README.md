@@ -1,5 +1,9 @@
 # AntBMS Monitor
 
+## STM32F1XX series
+
+Build and tested with STM32F100C8T6
+
 ## Schematics
 
 ```

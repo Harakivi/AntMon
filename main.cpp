@@ -37,13 +37,18 @@ int main()
     HAL_Init();
     SystemClock_Config();
     cli->Open(115200);
-    cli->print("start\r\n");
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
     bool valid = false;
-    Drivers::AntLiveData livedata = ant.ReadLiveData(valid);
     dac->ChannelInit(1);
-    
     while (1)
-    {        
+    {
+        Drivers::AntLiveData livedata = ant.ReadLiveData(valid);
+        cli->print("\033c");
+        cli->print("\r\n========================\r\n");
+        cli->print("AntBms data valid = %d\r\n", valid);
+        cli->print("AntBms percentage = %d\r\n", livedata.Struct.SOC);
+        cli->print("Total Voltage = %d\r\n", (livedata.Struct.TotalVoltage[0] << 8) + livedata.Struct.TotalVoltage[1]);
+        cli->print("========================\r\n");
+        HAL_Delay(2000);
     }
 }

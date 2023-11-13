@@ -9,9 +9,11 @@ namespace Drivers
     typedef struct
     {
         uint8_t FrameHeader[4];
-        uint8_t Voltage[65];
+        uint8_t TotalVoltage[2];
+        uint8_t Voltage[62];
+        uint8_t :1;
         uint32_t Current;
-        uint8_t RemainPercentage;
+        uint8_t SOC;
         uint32_t PhysCapacuty;
         uint32_t RemainCapacity;
         uint32_t CycleCapacity;

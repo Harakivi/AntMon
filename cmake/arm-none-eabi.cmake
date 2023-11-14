@@ -23,4 +23,4 @@ set(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS} -g -Og -DDEBUG")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS}")
 
-set(CMAKE_EXE_LINKER_FLAGS "-Wl,--print-memory-usage --specs=nosys.specs -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS "--specs=nosys.specs -lc -lnosys -lm -Wl,--gc-sections -Wl,--print-memory-usage")

@@ -6,43 +6,35 @@
 #include "dac.hpp"
 #include "cfifo.h"
 
-UART_HandleTypeDef huart1;
-
-void SystemClock_Config(void)
+enum CliStates
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+    Clear = 0,
+    SOC,
+    DacTestMode,
+};
 
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-    HAL_RCC_OscConfig(&RCC_OscInitStruct);
-
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
-}
+extern "C" void SystemClock_Config();
 
 typedef InternalPeriph::Uart<1> cliUart;
 typedef InternalPeriph::Uart<3> bmsUart;
 typedef InternalPeriph::Dac Dac;
-typedef Drivers::Cli Cli;
-
-Cli cli = Cli(cliUart::Get());
 Dac *dac = Dac::Get();
+
+typedef Drivers::Cli Cli;
+#ifdef DEBUG
+Cli cli = Cli(cliUart::Get());
+CliStates cliState;
+#endif
 
 bool valid = true;
 Drivers::AntLiveData livedata = {0};
 uint16_t dacValCh1 = 0;
 uint32_t liveDataReadLastTime = 0;
 
+#ifdef DEBUG
 void printSOC()
 {
+    cli.clear();
     cli.clearHeader();
     if (livedata.Struct.SOC >= 75)
         cli.printHeader("\033[92m");
@@ -57,19 +49,56 @@ void printSOC()
     cli.printHeader("========================\r\n");
 }
 
+void stateSOC()
+{
+    cliState = SOC;
+    cli.setHeaderUpdater(printSOC);
+}
+
+void dacSetVal(uint16_t value)
+{
+    dac->SetValue(value, 1);
+}
+
+void printDAC()
+{
+    cli.clear();
+    cli.clearHeader();
+    cli.printHeader("========================\r\n");
+    cli.printHeader("DAC ch1 Value = %d\r\n", dac->GetValue(1));
+    cli.printHeader("========================\r\n");
+}
+
+void stateDacTestMode()
+{
+    cliState = DacTestMode;
+    cli.setHeaderUpdater(printDAC);
+}
+
 void clearHeader()
 {
+    cliState = Clear;
+    cli.setHeaderUpdater(nullptr);
     cli.clearHeader();
+    cli.clear();
 }
+extern "C" void Reset_Handler();
+#endif
 
 int main()
 {
     HAL_Init();
     SystemClock_Config();
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
+    dac->ChannelInit(1);
+#ifdef DEBUG
     cli.Open(115200);
-    cli.AddCmd(cmd_t{"printSOC", NULL, (void*)printSOC, NULL});
-    cli.AddCmd(cmd_t{"clearHeader", NULL, (void*)clearHeader, NULL});
+    cli.AddCmd(cmd_t{"print_soc", NULL, (void *)stateSOC, NULL});
+    cli.AddCmd(cmd_t{"dac_test", NULL, (void *)stateDacTestMode, NULL});
+    cli.AddCmd(cmd_t{"dac_val", NULL, (void *)dacSetVal, UINT16});
+    cli.AddCmd(cmd_t{"clear", NULL, (void *)clearHeader, NULL});
+    cli.AddCmd(cmd_t{"reset", NULL, (void *)Reset_Handler, NULL});
+#endif
     while (1)
     {
         if (!liveDataReadLastTime || (HAL_GetTick() - liveDataReadLastTime) > 2000)
@@ -78,10 +107,15 @@ int main()
             if (valid)
             {
                 dacValCh1 = livedata.Struct.SOC * 12 + 2895;
-                dac->SetValue(dacValCh1, 1);
+#ifdef DEBUG
+                if (cliState != DacTestMode)
+#endif
+                    dac->SetValue(dacValCh1, 1);
             }
             liveDataReadLastTime = HAL_GetTick();
         }
+#ifdef DEBUG
         cli.Loop(HAL_GetTick());
+#endif
     }
 }

@@ -12,6 +12,7 @@ namespace Drivers
     private:
         Cli(){}
         InternalPeriph::iUart *_uart;
+        void(*_headerUpdater)();
         uint8_t cli_header[256];
         uint8_t cli_header_len;
         uint8_t cli_echo[100];
@@ -24,7 +25,9 @@ namespace Drivers
         void Loop(uint32_t time);
         void AddCmd(cmd_t cmd);
         int print(const char *format, ...);
+        void setHeaderUpdater(void(*_headerUpdater)());
         int printHeader(const char *format, ...);
+        void clear();
         void clearHeader();
         void onByteReceived(uint8_t data);
     };

@@ -23,6 +23,7 @@ void Cli::Loop(uint32_t time)
 {
     static bool errorParse = false;
     static uint32_t startErrorTime = 0;
+    static uint32_t lastHeaderUpdateTime = 0;
     if (needToParse)
     {
         print("\033[2K\r");
@@ -41,10 +42,6 @@ void Cli::Loop(uint32_t time)
     {
         // print("\033c");
         print("\r\n");
-        if (_headerUpdater != nullptr)
-        {
-            _headerUpdater();
-        }
         _uart->Write(cli_header, cli_header_len);
         print("\033[0m");
         print("Shell->");
@@ -54,6 +51,11 @@ void Cli::Loop(uint32_t time)
     if (errorParse && (time - startErrorTime) > 1000)
     {
         errorParse = false;
+    }
+    if (_headerUpdater != nullptr && time - lastHeaderUpdateTime > 1000)
+    {
+        _headerUpdater();
+        lastHeaderUpdateTime = time;
     }
 }
 

@@ -16,7 +16,7 @@ enum CliStates
 extern "C" void SystemClock_Config();
 
 typedef InternalPeriph::Uart<1> cliUart;
-typedef InternalPeriph::Uart<3> bmsUart;
+typedef InternalPeriph::Uart<2> bmsUart;
 typedef InternalPeriph::Dac Dac;
 Dac *dac = Dac::Get();
 
@@ -46,6 +46,7 @@ void printSOC()
     cli.printHeader("AntBms SOC = %d\r\n", livedata.Struct.SOC);
     cli.printHeader("Total Voltage = %d\r\n", (livedata.Struct.TotalVoltage[0] << 8) + livedata.Struct.TotalVoltage[1]);
     cli.printHeader("DAC ch1 Value = %d\r\n", dacValCh1);
+    cli.printHeader("Valid= %d\r\n", valid);
     cli.printHeader("========================\r\n");
 }
 

@@ -16,7 +16,7 @@ extern "C"
     {
         const char *cmdString;
         void *returns;
-        void *functor;
+        void (*functor)();
         void *takes;
     } cmd_t;
 

@@ -11,11 +11,7 @@ endif()
 set(PROJECT_VERSION 0.0.1.${GITHUB_RUN_NUMBER})
 
 string(TIMESTAMP DATE "%d.%m.%y")
-set(VERSION_INFO "#define VERSION \"${PROJECT_VERSION}\"" )
-set(DATE_INFO "#define DATE \"${DATE}\"" )
 message("Build version = ${PROJECT_VERSION}\r\nBuild date = ${DATE}")
-
-file(WRITE ${SOURCE_DIR}Version.h ${VERSION_INFO} "\r\n" ${DATE_INFO})
 
 set(ST_DEVICE STM32F100x8)
 
@@ -101,6 +97,10 @@ file(GLOB SOURCES
 set(TARGET ${PROJECT_NAME}.elf)
 
 add_executable(${TARGET} main.cpp ${SOURCES})
+
+target_compile_definitions(${TARGET} PUBLIC
+                            -DVERSION="${PROJECT_VERSION}"
+                            -DDATE="${DATE}")
 
 target_include_directories(${TARGET} PUBLIC CMSIS_LIBRARY_INCLUDE_DIR STM_HAL_LIBRARY_INCLUDE_DIR include/ small-printf/)
 

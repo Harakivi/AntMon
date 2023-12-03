@@ -109,13 +109,13 @@ int main()
     dac->ChannelInit(1);
 #ifdef DEBUG
     cli.Open(115200);
-    cli.AddCmd(cmd_t{"print_soc", NULL, (void *)stateSOC, NULL});
-    cli.AddCmd(cmd_t{"dac_test", NULL, (void *)stateDacTestMode, NULL});
-    cli.AddCmd(cmd_t{"soc_test", NULL, (void *)stateSOCTestMode, NULL});
-    cli.AddCmd(cmd_t{"dac_val", NULL, (void *)dacSetVal, UINT16});
-    cli.AddCmd(cmd_t{"soc_val", NULL, (void *)socSetVal, UINT16});
-    cli.AddCmd(cmd_t{"clear", NULL, (void *)clearHeader, NULL});
-    cli.AddCmd(cmd_t{"reset", NULL, (void *)Reset_Handler, NULL});
+    cli.AddCmd(cmd_t{"print_soc", NULL, stateSOC, NULL});
+    cli.AddCmd(cmd_t{"dac_test", NULL, stateDacTestMode, NULL});
+    cli.AddCmd(cmd_t{"soc_test", NULL, stateSOCTestMode, NULL});
+    cli.AddCmd(cmd_t{"dac_val", NULL, (void(*)())dacSetVal, UINT16});
+    cli.AddCmd(cmd_t{"soc_val", NULL, (void(*)())socSetVal, UINT16});
+    cli.AddCmd(cmd_t{"clear", NULL, clearHeader, NULL});
+    cli.AddCmd(cmd_t{"reset", NULL, Reset_Handler, NULL});
 #endif
     while (1)
     {

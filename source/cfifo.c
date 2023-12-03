@@ -56,7 +56,7 @@ bool cfifo_pop(cfifo *cfifo, uint8_t* byte)
 		return false;
 	}
 	cfifo->lock = true;
-	*byte = *(uint8_t *)(cfifo->ptr + cfifo->cursor);
+	*byte = *((uint8_t *)cfifo->ptr + cfifo->cursor);
 	cfifo->cursor++;
 	if (cfifo->cursor == cfifo->capacity)
 	{

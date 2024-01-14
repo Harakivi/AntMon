@@ -1,7 +1,7 @@
 #include "cmd_parser.h"
 #include <stdint.h>
 
-cmd_t cmd_list[7] = {0};
+cmd_t cmd_list[10] = {0};
 uint8_t cmd_cnt = 0;
 
 uint32_t parseNumber(const char* string)

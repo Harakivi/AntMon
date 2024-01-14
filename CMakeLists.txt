@@ -109,7 +109,7 @@ target_link_libraries(${TARGET} CMSIS_LIBRARY STM_HAL_LIBRARY)
 target_link_options(${TARGET} PUBLIC 
                         -T ${DEVICE_LINKER_SCRIPT} 
                         -Wl,-Map=${PROJECT_NAME}.map
-                        -Wl,--defsym,_Stack_Size=0x400
+                        -Wl,--defsym,_Stack_Size=0x500
                         -Wl,--defsym,_Heap_Size=0x200)
 
 add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_OBJCOPY} ARGS -O binary ${TARGET} ${PROJECT_NAME}.bin)

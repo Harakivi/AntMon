@@ -21,7 +21,7 @@ AntLiveData AntBms::ReadLiveData(bool &valid)
     while (readed != 140)
     {
         readed += _uart->GetReceived(liveData.Array + readed, sizeof(liveData) - readed);
-        if ((HAL_GetTick() - startTick) > 1000)
+        if ((HAL_GetTick() - startTick) > 5000)
         {
             return liveData;
         }

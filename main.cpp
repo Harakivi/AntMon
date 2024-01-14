@@ -4,7 +4,8 @@
 #include "Cli.hpp"
 #include "AntBms.hpp"
 #include "dac.hpp"
-#include "cfifo.h"
+#include "wdt.hpp"
+#include "STM32Bootloader.h"
 
 enum TestModes
 {
@@ -17,6 +18,7 @@ extern "C" void SystemClock_Config();
 
 static const uint16_t dacTable[] = {2400, 2750, 2925, 3075, 3350};
 
+typedef InternalPeriph::Wdt Wdt;
 typedef InternalPeriph::Uart<1> cliUart;
 typedef InternalPeriph::Uart<2> bmsUart;
 typedef InternalPeriph::Dac Dac;
@@ -105,15 +107,17 @@ int main()
 {
     HAL_Init();
     SystemClock_Config();
+    Wdt::Get()->Start(10000000);
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
     dac->ChannelInit(1);
 #ifdef DEBUG
     cli.Open(115200);
+    cli.AddCmd(cmd_t{"bootloader", NULL, EnterBootloader, NULL});
     cli.AddCmd(cmd_t{"print_soc", NULL, stateSOC, NULL});
     cli.AddCmd(cmd_t{"dac_test", NULL, stateDacTestMode, NULL});
     cli.AddCmd(cmd_t{"soc_test", NULL, stateSOCTestMode, NULL});
-    cli.AddCmd(cmd_t{"dac_val", NULL, (void(*)())dacSetVal, UINT16});
-    cli.AddCmd(cmd_t{"soc_val", NULL, (void(*)())socSetVal, UINT16});
+    cli.AddCmd(cmd_t{"dac_val", NULL, (void (*)())dacSetVal, UINT16});
+    cli.AddCmd(cmd_t{"soc_val", NULL, (void (*)())socSetVal, UINT16});
     cli.AddCmd(cmd_t{"clear", NULL, clearHeader, NULL});
     cli.AddCmd(cmd_t{"reset", NULL, Reset_Handler, NULL});
 #endif
@@ -123,7 +127,7 @@ int main()
         {
             livedata = ant.ReadLiveData(valid);
 #ifdef DEBUG
-            if(testMode != None)
+            if (testMode != None)
                 livedata.Struct.SOC = test_SOC;
             if (valid || testMode == SOCTestMode)
 #else
@@ -147,6 +151,7 @@ int main()
             }
             liveDataReadLastTime = HAL_GetTick();
         }
+        Wdt::Get()->ResetCounter();
 #ifdef DEBUG
         cli.Loop(HAL_GetTick());
 #endif

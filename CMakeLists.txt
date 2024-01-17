@@ -8,7 +8,7 @@ if(NOT DEFINED GITHUB_RUN_NUMBER)
     set(GITHUB_RUN_NUMBER 0)
 endif()
 
-set(PROJECT_VERSION 0.0.1.${GITHUB_RUN_NUMBER})
+set(PROJECT_VERSION 1.0.0.${GITHUB_RUN_NUMBER})
 
 string(TIMESTAMP DATE "%d.%m.%y")
 message("Build version = ${PROJECT_VERSION}\r\nBuild date = ${DATE}")

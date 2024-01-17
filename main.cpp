@@ -25,17 +25,13 @@ typedef InternalPeriph::Dac Dac;
 Dac *dac = Dac::Get();
 
 typedef Drivers::Cli Cli;
-#ifdef DEBUG
 Cli cli = Cli(cliUart::Get());
 TestModes testMode = None;
-#endif
 
 bool valid = true;
 Drivers::AntLiveData livedata = {0};
 uint16_t dacValCh1 = 0;
 uint32_t liveDataReadLastTime = 0;
-
-#ifdef DEBUG
 uint8_t test_SOC = 0;
 
 void printSOC()
@@ -51,6 +47,8 @@ void printSOC()
     cli.printHeader("========================\r\n");
     cli.printHeader("AntBms SOC = %d\r\n", livedata.Struct.SOC);
     cli.printHeader("Total Voltage = %d\r\n", (livedata.Struct.TotalVoltage[0] << 8) + livedata.Struct.TotalVoltage[1]);
+    cli.printHeader("Current = %d\r\n", livedata.Struct.Current);
+    cli.printHeader("Remain capacity = %d\r\n", livedata.Struct.RemainCapacity);
     cli.printHeader("DAC ch1 Value = %d\r\n", dacValCh1);
     cli.printHeader("Valid= %d\r\n", valid);
     cli.printHeader("========================\r\n");
@@ -100,8 +98,13 @@ void clearHeader()
     cli.clearHeader();
     cli.clear();
 }
+
+void printVersion()
+{
+    cli.print("Version = %s\r\n", VERSION);
+    cli.print("Date = %s\r\n", DATE);
+}
 extern "C" void Reset_Handler();
-#endif
 
 int main()
 {
@@ -110,7 +113,6 @@ int main()
     Wdt::Get()->Start(10000000);
     Drivers::AntBms ant = Drivers::AntBms(bmsUart::Get());
     dac->ChannelInit(1);
-#ifdef DEBUG
     cli.Open(115200);
     cli.AddCmd(cmd_t{"bootloader", NULL, EnterBootloader, NULL});
     cli.AddCmd(cmd_t{"print_soc", NULL, stateSOC, NULL});
@@ -120,19 +122,16 @@ int main()
     cli.AddCmd(cmd_t{"soc_val", NULL, (void (*)())socSetVal, UINT16});
     cli.AddCmd(cmd_t{"clear", NULL, clearHeader, NULL});
     cli.AddCmd(cmd_t{"reset", NULL, Reset_Handler, NULL});
-#endif
+    cli.AddCmd(cmd_t{"--version", NULL, printVersion, NULL});
+
     while (1)
     {
         if (!liveDataReadLastTime || (HAL_GetTick() - liveDataReadLastTime) > 2000)
         {
             livedata = ant.ReadLiveData(valid);
-#ifdef DEBUG
             if (testMode != None)
                 livedata.Struct.SOC = test_SOC;
             if (valid || testMode == SOCTestMode)
-#else
-            if (valid)
-#endif
             {
                 if (livedata.Struct.SOC >= 5 && livedata.Struct.SOC < 25)
                     dacValCh1 = dacTable[1];
@@ -144,16 +143,12 @@ int main()
                     dacValCh1 = dacTable[4];
                 else
                     dacValCh1 = dacTable[0];
-#ifdef DEBUG
                 if (testMode != DacTestMode)
-#endif
                     dac->SetValue(dacValCh1, 1);
             }
             liveDataReadLastTime = HAL_GetTick();
         }
         Wdt::Get()->ResetCounter();
-#ifdef DEBUG
         cli.Loop(HAL_GetTick());
-#endif
     }
 }

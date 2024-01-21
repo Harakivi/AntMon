@@ -34,10 +34,10 @@ namespace InternalPeriph
         static void _onByteReceived(uint8_t data);
 
     public:
-        static Uart *Get()
+        static Uart &Get()
         {
             static Uart instance = Uart();
-            return &instance;
+            return instance;
         }
 
         bool Open(uint32_t BaudRate, void (*onByteReceived)(uint8_t) = nullptr)
@@ -91,6 +91,6 @@ namespace InternalPeriph
 template <int uart>
 void InternalPeriph::Uart<uart>::_onByteReceived(uint8_t data)
 {
-    if (Uart<uart>::Get()->_handler != nullptr)
-        Uart<uart>::Get()->_handler->onByteReceived(data);
+    if (Uart<uart>::Get()._handler != nullptr)
+        Uart<uart>::Get()._handler->onByteReceived(data);
 }

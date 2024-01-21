@@ -10,8 +10,7 @@ namespace Drivers
     class Cli: public InternalPeriph::UartHandler
     {
     private:
-        Cli(){}
-        InternalPeriph::iUart *_uart;
+        InternalPeriph::iUart &_uart;
         void(*_headerUpdater)();
         uint8_t cli_header[256];
         uint8_t cli_header_len;
@@ -20,7 +19,7 @@ namespace Drivers
         bool needToParse;
         bool needToUpdateCli;
     public:
-        Cli(InternalPeriph::iUart *uart);
+        Cli(InternalPeriph::iUart &uart);
         void Open(uint32_t BaudRate);
         void Loop(uint32_t time);
         void AddCmd(cmd_t cmd);

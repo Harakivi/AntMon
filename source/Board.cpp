@@ -1,4 +1,5 @@
 #include "stm32f1xx_hal.h"
+#include "Board.hpp"
 
 void SystemClock_Config(void)
 {
@@ -18,4 +19,19 @@ void SystemClock_Config(void)
     RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
     HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
+}
+
+using namespace Hardware;
+
+InternalPeriph::iWdt &AntBmsMonitor::wdt = AntBmsMonitor::Wdt_t::Get();
+InternalPeriph::iUart &AntBmsMonitor::cliUart = AntBmsMonitor::cliUart_t::Get();
+InternalPeriph::iUart &AntBmsMonitor::bmsUart = AntBmsMonitor::bmsUart_t::Get();
+InternalPeriph::iDac &AntBmsMonitor::indicatorDac = AntBmsMonitor::indicatorDac_t::Get();
+
+void AntBmsMonitor::Init()
+{
+    Wdt_t::Get().Start(10000000);
+    HAL_Init();
+    SystemClock_Config();
+    indicatorDac_t::Init();
 }

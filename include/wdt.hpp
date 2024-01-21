@@ -4,16 +4,23 @@
 
 namespace InternalPeriph
 {
-    class Wdt
+    class iWdt
+    {
+    public:
+        virtual void ResetCounter() = 0;
+    };
+
+    class Wdt : public iWdt
     {
     private:
         bool _started;
-        Wdt() : _started(false){}
+        Wdt() : _started(false) {}
+
     public:
-        static Wdt *Get()
+        static Wdt &Get()
         {
             static Wdt instance = Wdt();
-            return &instance;
+            return instance;
         }
 
         bool Start(uint32_t period_us)
@@ -21,7 +28,7 @@ namespace InternalPeriph
             return WdtStart(period_us);
         }
 
-        void ResetCounter()
+        virtual void ResetCounter()
         {
             WdtResetCounter();
         }

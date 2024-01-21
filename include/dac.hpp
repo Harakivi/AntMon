@@ -4,32 +4,47 @@
 
 namespace InternalPeriph
 {
-    class Dac
+    class iDac
+    {
+    public:
+        virtual bool ChannelInit() = 0;
+
+        virtual bool SetValue(uint16_t value) = 0;
+
+        virtual uint16_t GetValue() = 0;
+    };
+
+    template <uint8_t channel>
+    class Dac : public iDac
     {
     private:
-        Dac():_chanInitied{false} {}
-        bool _chanInitied[2];
+        Dac() : _chanInitied{false} {}
+        bool _chanInitied;
+        static bool _initied;
+
     public:
-        static Dac* Get()
+        static Dac &Get()
         {
             static Dac instance = Dac();
-            static bool _initied = DacInit(); 
-            if(!_initied)
-            {
-                return nullptr;
-            }
-            return &instance;
+            return instance;
         }
 
-        bool ChannelInit(uint8_t channel = 1)
+        static bool Init()
         {
-            _chanInitied[channel - 1] = DacChannelInit(channel);
-            return _chanInitied[channel - 1];
+            if (!_initied)
+                _initied = DacInit();
+            return _initied;
         }
 
-        bool SetValue(uint16_t value, uint8_t channel = 1)
+        virtual bool ChannelInit()
         {
-            if(!_chanInitied[channel - 1])
+            _chanInitied = DacChannelInit(channel);
+            return _chanInitied;
+        }
+
+        virtual bool SetValue(uint16_t value)
+        {
+            if (!_initied && !_chanInitied)
             {
                 return false;
             }
@@ -37,13 +52,16 @@ namespace InternalPeriph
             return true;
         }
 
-        uint16_t GetValue(uint8_t channel = 1)
+        virtual uint16_t GetValue()
         {
-            if(!_chanInitied[channel - 1])
+            if (!_initied && !_chanInitied)
             {
                 return 0;
             }
             return DacGetValue(channel);
         }
     };
+
+    template <uint8_t channel>
+    bool Dac<channel>::_initied;
 }

@@ -27,7 +27,7 @@ AntBmsMonitor::AntBmsMonitor(Drivers::AntBmsDriver &bmsDriver, Drivers::Cli &cli
             constCli.printHeader("Total Voltage = %d.%dV\r\n", constBmsDriver.GetLastLiveData().Struct.TotalVoltage / 10, constBmsDriver.GetLastLiveData().Struct.TotalVoltage % 10);
             constCli.printHeader("Current = %d.%dA\r\n", constBmsDriver.GetLastLiveData().Struct.Current / 10, constBmsDriver.GetLastLiveData().Struct.Current % 10);
             constCli.printHeader("Remain capacity = %3.6fA*h\r\n", constBmsDriver.GetLastLiveData().Struct.RemainCapacity / 1000000.0);
-            constCli.printHeader("SystemLog = %b\r\n", constBmsDriver.GetLastLiveData().Struct.SystemLogs);
+            constCli.printHeader("Charge = %d\r\n", constBmsDriver.GetLastLiveData().Struct.SystemLogs.Struct.Charge);
             constCli.printHeader("DAC ch1 Value = %d\r\n", constDac.GetValue());
             constCli.printHeader("========================\r\n");
         }
@@ -38,13 +38,9 @@ AntBmsMonitor::AntBmsMonitor(Drivers::AntBmsDriver &bmsDriver, Drivers::Cli &cli
         constCli.setHeaderUpdater(printSOC);
     };
 
-    static auto chargeBlink = []()
-    {
-        // blink = !blink;
-    };
-
     cli.AddCmd(cmd_t{"print_soc", NULL, stateSOC, NULL});
-    cli.AddCmd(cmd_t{"blink", NULL, chargeBlink, NULL});
+
+    dac.ChannelInit();
 }
 
 void AntBmsMonitor::Loop(uint32_t time)
@@ -52,6 +48,16 @@ void AntBmsMonitor::Loop(uint32_t time)
     static uint32_t lastBlinkTime = time;
     if (_bmsDriver.GetValidOfLastLiveData())
     {
+        if (_bmsDriver.GetLastLiveData().Struct.SystemLogs.Struct.Charge && (HAL_GetTick() - lastBlinkTime > 1000))
+        {
+            _chargeBlink = !_chargeBlink;
+            lastBlinkTime = HAL_GetTick();
+        }
+        else if (!_bmsDriver.GetLastLiveData().Struct.SystemLogs.Struct.Charge)
+        {
+            _chargeBlink = false;
+        }
+
         if (_bmsDriver.GetLastLiveData().Struct.SOC >= 10 && _bmsDriver.GetLastLiveData().Struct.SOC < 25)
             _dac.SetValue(dacTable[1 + _chargeBlink]);
         else if (_bmsDriver.GetLastLiveData().Struct.SOC >= 25 && _bmsDriver.GetLastLiveData().Struct.SOC < 50)
@@ -63,13 +69,4 @@ void AntBmsMonitor::Loop(uint32_t time)
         else
             _dac.SetValue(dacTable[0 + _chargeBlink]);
     }
-    if (_chargeBlink && (HAL_GetTick() - lastBlinkTime > 1000))
-    {
-        _chargeBlink = !_chargeBlink;
-        lastBlinkTime = HAL_GetTick();
-    }
-    // else if (!blink)
-    // {
-    //     _chargeBlink = false;
-    // }
 }

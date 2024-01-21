@@ -59,7 +59,7 @@ void AntBmsDriver::_UpdateLiveData()
         {
             _liveData.Struct.TotalVoltage = _ReverseLSB(_liveData.Struct.TotalVoltage);
             _liveData.Struct.RemainCapacity = _ReverseLSB(_liveData.Struct.RemainCapacity);
-            _liveData.Struct.SystemLogs = _ReverseLSB(_liveData.Struct.SystemLogs);
+            _liveData.Struct.SystemLogs.Data = _ReverseLSB(_liveData.Struct.SystemLogs.Data);
             _liveDataValid = true;
         }
         _liveDataWritePos = 0;

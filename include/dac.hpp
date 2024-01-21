@@ -63,5 +63,5 @@ namespace InternalPeriph
     };
 
     template <uint8_t channel>
-    bool Dac<channel>::_initied;
+    bool Dac<channel>::_initied = false;
 }

@@ -7,6 +7,22 @@ namespace Drivers
 
 #pragma pack(push, 1)
 
+    typedef struct 
+    {
+        uint16_t Status : 5;
+        uint16_t BatteryNumber : 5;
+        uint16_t SequentialOrder : 5;
+        bool Charge : 1;
+    }_AntBmsSystemLog;
+
+    typedef union 
+    {
+        uint16_t Data;
+        _AntBmsSystemLog Struct;
+
+    }AntBmsSystemLog;
+    
+
     typedef struct
     {
         uint8_t FrameHeader[4];
@@ -37,7 +53,7 @@ namespace Drivers
         uint16_t : 16;
         uint16_t : 16;
         uint32_t CellsBalancedBitMask;
-        uint16_t SystemLogs;
+        AntBmsSystemLog SystemLogs;
         uint16_t CheckSum;
     } AntLiveDataStruct;
 #pragma pack(pop)

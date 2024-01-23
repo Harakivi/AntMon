@@ -58,6 +58,7 @@ void AntBmsDriver::_UpdateLiveData()
         if (_CalcCheckSum(_liveData) == _liveData.Struct.CheckSum)
         {
             _liveData.Struct.TotalVoltage = _ReverseLSB(_liveData.Struct.TotalVoltage);
+            _liveData.Struct.Current = _ReverseLSB(_liveData.Struct.Current);
             _liveData.Struct.RemainCapacity = _ReverseLSB(_liveData.Struct.RemainCapacity);
             _liveData.Struct.SystemLogs.Data = _ReverseLSB(_liveData.Struct.SystemLogs.Data);
             _liveDataValid = true;
@@ -89,4 +90,9 @@ uint16_t __attribute__((always_inline)) AntBmsDriver::_ReverseLSB(uint16_t toRev
 uint32_t __attribute__((always_inline)) AntBmsDriver::_ReverseLSB(uint32_t toReverse)
 {
     return (uint32_t)(((LSB32 *)&toReverse)->_0 << 24) + (((LSB32 *)&toReverse)->_1 << 16) + (((LSB32 *)&toReverse)->_2 << 8) + ((LSB32 *)&toReverse)->_3;
+}
+
+int32_t __attribute__((always_inline)) AntBmsDriver::_ReverseLSB(int32_t toReverse)
+{
+    return (int32_t)(((LSB32 *)&toReverse)->_0 << 24) + (((LSB32 *)&toReverse)->_1 << 16) + (((LSB32 *)&toReverse)->_2 << 8) + ((LSB32 *)&toReverse)->_3;
 }

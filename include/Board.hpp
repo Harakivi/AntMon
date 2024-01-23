@@ -23,4 +23,4 @@ namespace Hardware
         static InternalPeriph::iDac &indicatorDac;
         static void Init();
     };
-};
+}

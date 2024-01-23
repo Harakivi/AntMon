@@ -79,6 +79,7 @@ namespace Drivers
         uint16_t _CalcCheckSum(const AntLiveData& liveData);
         inline uint16_t _ReverseLSB(uint16_t toReverse);
         inline uint32_t _ReverseLSB(uint32_t toReverse);
+        inline int32_t _ReverseLSB(int32_t toReverse);
     public:
         AntBmsDriver(uint32_t updatePeriod_ms, InternalPeriph::iUart &uart);
         const bool& GetValidOfLastLiveData();

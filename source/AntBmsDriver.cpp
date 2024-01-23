@@ -17,7 +17,7 @@ struct LSB32
     uint8_t _3;
 };
 
-AntBmsDriver::AntBmsDriver(uint32_t updatePeriod_ms, InternalPeriph::iUart &uart) : _liveData{0}, _liveDataWritePos(0), _liveDataValid(false), _updatePeriod_ms(updatePeriod_ms), _lastUpdateTime(0), _uart(uart)
+AntBmsDriver::AntBmsDriver(uint32_t updatePeriod_ms, InternalPeriph::iUart &uart) : _liveData{0}, _dispData{0},_liveDataWritePos(0), _liveDataValid(false), _dispDataValid(false),_updatePeriod_ms(updatePeriod_ms), _lastUpdateTime(0), _uart(uart)
 {
     _uart.Open(19200, this);
 }
@@ -30,6 +30,16 @@ const bool &AntBmsDriver::GetValidOfLastLiveData()
 const AntLiveData &AntBmsDriver::GetLastLiveData()
 {
     return _liveData;
+}
+
+const bool &AntBmsDriver::GetValidOfLastDispData()
+{
+    return _dispDataValid;
+}
+
+const AntDispData &AntBmsDriver::GetLastDispData()
+{
+    return _dispData;
 }
 
 void AntBmsDriver::Loop(uint32_t time)
@@ -54,14 +64,14 @@ void AntBmsDriver::_UpdateLiveData()
 {
     if (_liveDataWritePos == 140)
     {
-        _liveData.Struct.CheckSum = _ReverseLSB(_liveData.Struct.CheckSum);
         if (_CalcCheckSum(_liveData) == _liveData.Struct.CheckSum)
         {
-            _liveData.Struct.TotalVoltage = _ReverseLSB(_liveData.Struct.TotalVoltage);
-            _liveData.Struct.Current = _ReverseLSB(_liveData.Struct.Current);
-            _liveData.Struct.RemainCapacity = _ReverseLSB(_liveData.Struct.RemainCapacity);
-            _liveData.Struct.SystemLogs.Data = _ReverseLSB(_liveData.Struct.SystemLogs.Data);
+            _dispData.SOC = _liveData.Struct.SOC;
+            _dispData.TotalVoltage = _ReverseLSB(_liveData.Struct.TotalVoltage) / 10.0;
+            _dispData.Current = _ReverseLSB(_liveData.Struct.Current) / 10.0;
+            _dispData.RemainCapacity = _ReverseLSB(_liveData.Struct.RemainCapacity) / 1000000.0;
             _liveDataValid = true;
+            _dispDataValid = true;
         }
         _liveDataWritePos = 0;
     }
@@ -79,7 +89,7 @@ uint16_t AntBmsDriver::_CalcCheckSum(const AntLiveData &liveData)
     {
         checksum += liveData.Array[i];
     }
-    return checksum;
+    return _ReverseLSB(checksum);
 }
 
 uint16_t __attribute__((always_inline)) AntBmsDriver::_ReverseLSB(uint16_t toReverse)

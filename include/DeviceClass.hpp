@@ -13,6 +13,7 @@ namespace DeviceClass
         Drivers::Cli &_cli;
         InternalPeriph::iDac &_dac;
         bool _chargeBlink;
+        uint32_t _chargeDetectTime;
     public:
         AntBmsMonitor(Drivers::AntBmsDriver &bmsDriver, Drivers::Cli &cli, InternalPeriph::iDac &dac);
         void Loop(uint32_t time);

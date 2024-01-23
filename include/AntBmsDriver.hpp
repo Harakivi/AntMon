@@ -64,13 +64,23 @@ namespace Drivers
         uint8_t Array[140];
     } AntLiveData;
 
+    typedef struct
+    {
+        float TotalVoltage;
+        float Current;
+        float RemainCapacity;
+        uint8_t SOC;
+    }AntDispData;
+
 
     class AntBmsDriver: public InternalPeriph::UartHandler
     {
     private:
         AntLiveData _liveData;
+        AntDispData _dispData;
         uint8_t _liveDataWritePos;
         bool _liveDataValid;
+        bool _dispDataValid;
         uint32_t _updatePeriod_ms;
         uint32_t _lastUpdateTime;
         InternalPeriph::iUart &_uart;
@@ -84,6 +94,8 @@ namespace Drivers
         AntBmsDriver(uint32_t updatePeriod_ms, InternalPeriph::iUart &uart);
         const bool& GetValidOfLastLiveData();
         const AntLiveData& GetLastLiveData();
+        const bool& GetValidOfLastDispData();
+        const AntDispData& GetLastDispData();
         void Loop(uint32_t time);
         void onByteReceived(uint8_t data);
     };
